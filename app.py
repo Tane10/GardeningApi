@@ -4,7 +4,7 @@ from twilio.rest import Client
 from dotenv import load_dotenv
 from twilio.twiml.messaging_response import MessagingResponse
 
-from functions import *
+import functions as rasp_func
 
 load_dotenv()
 
@@ -26,13 +26,39 @@ def welcome():
 
 @app.route("/api", methods=['GET', 'POST'])
 def replay():
-    msg = request.form.get('Body')
-
+    msg_lower = request.form.get('Body').lower()
     resp = MessagingResponse()
 
-    if "water plant" in msg or "Water plant" in msg:
-        water_plants()
-        return str(resp)
+    if "water plant" in msg_lower:
+        resp.message(rasp_func.water_plants())
+
+    elif "check status" in msg_lower:
+        resp.message(rasp_func.check_module_status())
+
+    elif "soil info" in msg_lower:
+        resp.message(rasp_func.soil_tracker())
+
+    elif "temp" in msg_lower or "temperature" in msg_lower:
+        resp.message(rasp_func.temp_humidity_check())
+
+    elif "pictures" in msg_lower or "plant pictures" in msg_lower :
+        resp.message(rasp_func.picture_plants())
+
+    elif "device shutdown pin" in msg_lower or "device reset pin" in msg_lower:
+
+        if 'pin: ' in msg_lower:
+            pin_index = msg_lower.find('pin: ')
+            pin_start_idx = pin_index + 5
+            pin_end_idx = pin_start_idx + 4
+            pin = msg_lower[pin_start_idx:pin_end_idx]
+            resp.message(rasp_func.shutdown(pin))
+
+        elif 'pin ' in msg_lower:
+            pin_index = msg_lower.find('pin ')
+            pin_start_idx = pin_index + 4
+            pin_end_idx = pin_start_idx + 4
+            pin = msg_lower[pin_start_idx:pin_end_idx]
+            resp.message(rasp_func.shutdown(pin))
 
     else:
         resp.message("do nothing then")
