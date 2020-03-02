@@ -1,5 +1,5 @@
 from gpiozero.pins.mock import MockFactory
-from gpiozero import Device, Button, LED
+from gpiozero import Device, Button, LED, output_devices
 import os
 
 
@@ -100,3 +100,4 @@ def shutdown(pin):
 
     shutdown_msg = "Are you sure you want to shutdown"
     return shutdown_msg
+
