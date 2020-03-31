@@ -1,13 +1,15 @@
 from gpiozero.pins.mock import MockFactory
 from gpiozero import Device, Button, LED, OutputDevice
-from gpiozero.pins.mock import MockPin
 import os
 import time
+import random
 
-# if os.getenv('ENVIRONMENT') == "DEV":
+from dotenv import load_dotenv
+load_dotenv()
 
-# Device.pin_factory = MockFactory()
-Device.pin_factory = MockPin
+if os.getenv('ENVIRONMENT') == "DEV":
+    Device.pin_factory = MockFactory()
+
 '''
 process:
 - check soil moisture once a day? 
@@ -27,42 +29,102 @@ process:
 '''
 
 def turn_on_relay(soil_moisture):
+    # soil need to be above 88% to not be watered
     # relay led and relay GPIO setup
-    # relay = OutputDevice(pin=24, active_high=False, initial_value=False)
-    mock_relay = MockPin(number=21)    # relay_led = LED(21)
-    # mock_led = Device.pin_factory.pin(21)
+
+    relay = OutputDevice(24, False, False)
+    relay_led = LED(21)
+
+    # turn on light and then blink light to show its watering
+
+    if soil_moisture >= 80:
+        print("plants don't need to be watered")
+
+    else:
+        print("turning on relay")
+
+        while soil_moisture <= 80:
+            relay_led.on()
+            time.sleep(0.5)
+            relay_led.blink()
+            relay.on()
+            soil_moisture += 10.0
+
+        print("turning off relay plants are done watered")
+        relay_led.off()
+        relay.off()
+
+
 
     #!!! IMPORTANT MOCKFACTORY() MOCKS THE FUNCITONS / ATTRIBUTES ASSOCATED WITH THE PIN YOU MOCK
-    # relay_led.
 
-    # if  mock_relay._get_state():
-    #     print(mock_relay._get_state())
-    #     print(mock_relay.input_with_pull('down'))
-    #     print(mock_relay.read())
+def auto_water():
+    # soil need to be above 88% to not be watered
+    # relay led and relay GPIO setup
 
-        # mock_relay.drive_low()
-        # print(mock_relay.value)
+    soil_moisture = round(random.uniform(0, 90), 2)
+    relay = OutputDevice(24, False, False)
+    relay_led = LED(21)
+    return_msg = ""
+
+    # turn on light and then blink light to show its watering
+
+    if soil_moisture >= 80:
+        return_msg = "The plants don't need to be watered"
+    else:
+        print("turning on relay")
+        while soil_moisture <= 80:
+            relay_led.on()
+            time.sleep(0.5)
+            relay_led.blink()
+            relay.on()
+            soil_moisture += 10.0
+
+        return_msg = "turning off relay plants are watered"
+        relay_led.off()
+        relay.off()
+
+    return return_msg
+
+    #!!! IMPORTANT MOCKFACTORY() MOCKS THE FUNCITONS / ATTRIBUTES ASSOCATED WITH THE PIN YOU MOCK
 
 
-    # mock_relay.blink()
-    # print(mock_relay.drive_low())
-    #
-    # print(mock_relay)
-    # mock_relay.on()
+def check_status():
+    relay_pin = OutputDevice(24, False, False)
+    relay_led_pin = LED(21)
+    soil_moisture_reader_pin = OutputDevice(12, False, False)
+    temp_reader_pin = OutputDevice(9, False, False)
 
-    # while not soil_moisture >= 50:
-    # #
-    #     if  mock_relay._get_state():
-    #         print('turning on relay')
-    #         mock_relay.on()
-    #         # mock_led.blink()
-    #         # time.sleep(10)
-    #         # mock_relay.toggle()
-    #         # print('turning off relay')
-    #         # mock_led.on()
-    #         # mock_led.off()
-    #     soil_moisture += 10.0
+    pin_used = [relay_pin, relay_led_pin, soil_moisture_reader_pin, temp_reader_pin]
 
-# print("plants are watered")
+    for pin in pin_used:
+        try:
+            print('Cycling through devices')
+            pin.on()
+            print(pin.value)
+            pin.off()
+            print(pin.value)
+        except Exception as e:
+            relay_pin.off()
+            relay_led_pin.off()
+            soil_moisture_reader_pin.off()
+            temp_reader_pin.off()
+            print(e)
+            return e
 
-turn_on_relay(20)
+    return "All devices are working"
+
+
+def soil_tracker():
+    soil_moisture_reader_pin = OutputDevice(12, False, False)
+    soil_moisture_reader_pin.on()
+    soil_moisture_reader_pin.off()
+
+    return ""
+
+
+
+
+# turn_on_relay(90)
+# auto_water()
+# check_status()

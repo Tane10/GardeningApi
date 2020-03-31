@@ -4,7 +4,7 @@ from twilio.rest import Client
 from dotenv import load_dotenv
 from twilio.twiml.messaging_response import MessagingResponse
 
-import functions as rasp_func
+import piFunctions as rasp_func
 
 load_dotenv()
 
@@ -30,10 +30,12 @@ def replay():
     resp = MessagingResponse()
 
     if "water plant" in msg_lower:
-        resp.message(rasp_func.water_plants())
+        resp.message("will try to water your plants")
+        resp.message(rasp_func.auto_water())
 
     elif "check status" in msg_lower:
-        resp.message(rasp_func.check_module_status())
+        resp.message("Checking everything is ok")
+        resp.message(rasp_func.check_status())
 
     elif "soil info" in msg_lower:
         resp.message(rasp_func.soil_tracker())
@@ -41,7 +43,7 @@ def replay():
     elif "temp" in msg_lower or "temperature" in msg_lower:
         resp.message(rasp_func.temp_humidity_check())
 
-    elif "pictures" in msg_lower or "plant pictures" in msg_lower :
+    elif "pictures" in msg_lower or "plant pictures" in msg_lower:
         resp.message(rasp_func.picture_plants())
 
     elif "device shutdown pin" in msg_lower or "device reset pin" in msg_lower:

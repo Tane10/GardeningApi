@@ -1,6 +1,7 @@
 from gpiozero.pins.mock import MockFactory
 from gpiozero import Device, Button, LED, output_devices
 import os
+import piFunctions as pifunc
 
 
 def check_module_status():
@@ -54,8 +55,7 @@ def water_plants():
     but give warning.
     Runs auto every day
     '''
-    water_plants_msg = "i shall water the plants now"
-    return water_plants_msg
+    return pifunc.auto_water()
 
 
 def soil_tracker():
@@ -100,4 +100,8 @@ def shutdown(pin):
 
     shutdown_msg = "Are you sure you want to shutdown"
     return shutdown_msg
+
+water_plants()
+
+print("can we sync it")
 
